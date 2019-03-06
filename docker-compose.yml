@@ -1,0 +1,40 @@
+version: '3'
+volumes:
+  pgdata:
+services:
+  python: &python
+    # image: python:3.5
+    build:
+      context: .
+      dockerfile: docker/dev/python/Dockerfile
+    environment:
+    - PYTHONUNBUFFERED=1
+    volumes:
+      - ./oametrix2019/openaccess:/app
+    ports:
+      - 8000:8000
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - postgres
+      - rabbitmq
+      - celery_worker
+  postgres:
+    image: postgres:10.3
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_DB: db
+      POSTGRES_PASS: password
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+  ## message queue for celery
+  rabbitmq:
+    image: rabbitmq:3.7-alpine
+  celery_worker:
+    <<: *python
+    command: celery -A dockerize-project worker --loglevel=info
+    ports: []
+    depends_on:
+      - rabbitmq
+      - postgres
