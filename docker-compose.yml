@@ -1,12 +1,11 @@
-version: '3'
+version: '1'
 volumes:
   pgdata:
 services:
   python: &python
-    # image: python:3.5
     build:
       context: .
-      dockerfile: docker/dev/python/Dockerfile
+      dockerfile: docker/dev/backend/Dockerfile
     environment:
     - PYTHONUNBUFFERED=1
     volumes:
